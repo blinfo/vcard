@@ -29,15 +29,22 @@ public class VcardReader {
         Person person = new Person();
         for (String line : lines) {
             if (line.startsWith("N:")) {
+                Name name = new Name();
                 String[] nameParts = line.substring(2).split(";");
-                person.setFirstName(nameParts[1]);
-                person.setLastName(nameParts[0]);
+                name.setGivenName(nameParts[1]);
+                name.setFamilyName(nameParts[0]);
+                name.setAdditionalName(nameParts[2]);
+                name.setPrefixes(nameParts[3]);
+                person.setName(name);
             }
             if (line.startsWith("ORG:")) {
                 person.setOrganisation(line.substring(4));
             }
             if (line.startsWith("PHOTO;")) {
-                person.setPhoto(line.substring(26));
+                Photo photo = new Photo();
+                photo.setUrl(line.substring(line.indexOf(":") + 1));
+                photo.setMediaType(line.substring(line.indexOf("=") + 1, line.indexOf(":")));
+                person.setPhoto(photo);
             }
         }
         return person;

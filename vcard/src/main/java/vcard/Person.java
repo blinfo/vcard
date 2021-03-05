@@ -6,63 +6,26 @@ package vcard;
  */
 public class Person {
 
-    private String firstName;
-    private String middleName;
-    private String lastName;
-    private String title;
-    private String title1;
+    private Name name;
     private String organisation;
-    private String title2;
-    private String photo;
-    private String mediaType;
+    private String title;
+    private Photo photo;
     private String phoneWork;
     private String phoneHome;
     private String addressWork;
     private String addressHome;
-    private String email1;
+    private String email;
     private String revision;
 
     public Person() {
     }
 
-    public String getFirstName() {
-        return firstName;
+    public Name getName() {
+        return name;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getMiddleName() {
-        return middleName;
-    }
-
-    public void setMiddleName(String middleName) {
-        this.middleName = middleName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getTitle1() {
-        return title1;
-    }
-
-    public void setTitle1(String title1) {
-        this.title1 = title1;
+    public void setName(Name name) {
+        this.name = name;
     }
 
     public String getOrganisation() {
@@ -73,28 +36,20 @@ public class Person {
         this.organisation = organisation;
     }
 
-    public String getTitle2() {
-        return title2;
+    public String getTitle() {
+        return title;
     }
 
-    public void setTitle2(String title2) {
-        this.title2 = title2;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
-    public String getPhoto() {
+    public Photo getPhoto() {
         return photo;
     }
 
-    public void setPhoto(String photo) {
+    public void setPhoto(Photo photo) {
         this.photo = photo;
-    }
-
-    public String getMediaType() {
-        return mediaType;
-    }
-
-    public void setMediaType(String mediaType) {
-        this.mediaType = mediaType;
     }
 
     public String getPhoneWork() {
@@ -129,12 +84,12 @@ public class Person {
         this.addressHome = addressHome;
     }
 
-    public String getEmail1() {
-        return email1;
+    public String getEmail() {
+        return email;
     }
 
-    public void setEmail1(String email1) {
-        this.email1 = email1;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getRevision() {
