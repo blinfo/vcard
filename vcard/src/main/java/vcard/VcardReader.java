@@ -104,7 +104,7 @@ public class VcardReader {
         return photo;
     }
 
-    private static String extractOrganisationName(String line) {
+    private String extractOrganisationName(String line) {
         return line.substring(4);
     }
 
