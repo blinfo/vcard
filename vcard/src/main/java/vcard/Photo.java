@@ -25,4 +25,9 @@ public class Photo {
         this.mediaType = mediaType;
     }
 
+    @Override
+    public String toString() {
+        return "Photo{" + "url=" + url + ", mediaType=" + mediaType + '}';
+    }
+
 }

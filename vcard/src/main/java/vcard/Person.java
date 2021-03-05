@@ -1,5 +1,7 @@
 package vcard;
 
+import java.util.List;
+
 /**
  *
  * @author Håkan Lidén
@@ -10,12 +12,10 @@ public class Person {
     private String organisation;
     private String title;
     private Photo photo;
-    private String phoneWork;
-    private String phoneHome;
+    private List<Phone> phones;
     private String addressWork;
     private String addressHome;
     private String email;
-    private String revision;
 
     public Person() {
     }
@@ -52,20 +52,12 @@ public class Person {
         this.photo = photo;
     }
 
-    public String getPhoneWork() {
-        return phoneWork;
+    public List<Phone> getPhones() {
+        return phones;
     }
 
-    public void setPhoneWork(String phoneWork) {
-        this.phoneWork = phoneWork;
-    }
-
-    public String getPhoneHome() {
-        return phoneHome;
-    }
-
-    public void setPhoneHome(String phoneHome) {
-        this.phoneHome = phoneHome;
+    public void setPhones(List<Phone> phones) {
+        this.phones = phones;
     }
 
     public String getAddressWork() {
@@ -92,12 +84,17 @@ public class Person {
         this.email = email;
     }
 
-    public String getRevision() {
-        return revision;
-    }
-
-    public void setRevision(String revision) {
-        this.revision = revision;
+    @Override
+    public String toString() {
+        return "Person{"
+                + "name=" + name + ", "
+                + "organisation=" + organisation + ", "
+                + "title=" + title + ", "
+                + "photo=" + photo + ", "
+                + "phones=" + phones + ", "
+                + "addressWork=" + addressWork + ", "
+                + "addressHome=" + addressHome + ", "
+                + "email=" + email + '}';
     }
 
 }

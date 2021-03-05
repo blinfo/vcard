@@ -36,4 +36,9 @@ public class Vcard {
         this.revision = revision;
     }
 
+    @Override
+    public String toString() {
+        return "Vcard{" + "version=" + version + ", person=" + person + ", revision=" + revision + '}';
+    }
+
 }

@@ -55,4 +55,14 @@ public class Name {
         this.suffixes = suffixes;
     }
 
+    @Override
+    public String toString() {
+        return "Name{"
+                + "givenName=" + givenName + ", "
+                + "familyName=" + familyName + ", "
+                + "additionalName=" + additionalName + ", "
+                + "prefixes=" + prefixes + ", "
+                + "suffixes=" + suffixes + '}';
+    }
+
 }

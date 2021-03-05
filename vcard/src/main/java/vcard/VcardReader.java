@@ -11,8 +11,11 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  *
@@ -21,6 +24,7 @@ import java.util.List;
 public class VcardReader {
 
     private final InputStream source;
+    private List<Phone> phones;
 
     public VcardReader(InputStream source) {
         this.source = source;
@@ -32,26 +36,48 @@ public class VcardReader {
         result.setPerson(person);
         try {
             getLines().forEach(line -> {
-                if (line.startsWith("VERSION:")) {
+                if (line.startsWith("VERSION")) {
                     result.setVersion(extractVersion(line));
                 }
-                if (line.startsWith("REV:")) {
+                if (line.startsWith("REV")) {
                     result.setRevision(extractRevision(line));
                 }
-                if (line.startsWith("N:")) {
+                if (line.startsWith("N")) {
                     person.setName(extractName(line));
                 }
-                if (line.startsWith("ORG:")) {
+                if (line.startsWith("ORG")) {
                     person.setOrganisation(extractOrganisationName(line));
                 }
-                if (line.startsWith("PHOTO;")) {
+                if (line.startsWith("PHOTO")) {
                     person.setPhoto(extractPhoto(line));
                 }
+                if (line.startsWith("TEL")) {
+                    addPhone(line);
+                }
             });
+            person.setPhones(phones);
+            phones = new ArrayList<>();
             return result;
         } catch (IOException ex) {
             throw new VcardException("Could not extract data from source", ex);
         }
+    }
+
+    private void addPhone(String line) {
+        if (phones == null) {
+            phones = new ArrayList<>();
+        }
+        Phone phone = new Phone();
+        String[] parts = line.split(";");
+        for (String part : parts) {
+            if (part.toUpperCase().startsWith("TYPE")) {
+                phone.setLabels(Stream.of(part.substring(part.indexOf("=") + 1).split(",")).map(s -> s.trim()).collect(Collectors.toList()));
+            }
+            if (part.toUpperCase().startsWith("VALUE")) {
+                phone.setNumber(part.substring(part.lastIndexOf(":") + 1));
+            }
+        }
+        phones.add(phone);
     }
 
     private ZonedDateTime extractRevision(String line) {
@@ -84,15 +110,20 @@ public class VcardReader {
 
     private Name extractName(String line) {
         Name name = new Name();
+        int given = 1,
+                family = 0,
+                additional = 2,
+                prefixes = 3,
+                suffixes = 4;
         String[] nameParts = line.substring(line.indexOf(":") + 1).split(";");
-        name.setGivenName(nameParts[1]);
-        name.setFamilyName(nameParts[0]);
-        name.setAdditionalName(nameParts[2]);
-        if (nameParts.length > 3) {
-            name.setPrefixes(nameParts[3]);
+        name.setGivenName(nameParts[given]);
+        name.setFamilyName(nameParts[family]);
+        name.setAdditionalName(nameParts[additional]);
+        if (nameParts.length > prefixes) {
+            name.setPrefixes(nameParts[prefixes]);
         }
-        if (nameParts.length > 4) {
-            name.setSuffixes(nameParts[4]);
+        if (nameParts.length > suffixes) {
+            name.setSuffixes(nameParts[suffixes]);
         }
         return name;
     }
