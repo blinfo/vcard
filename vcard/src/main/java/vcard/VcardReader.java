@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  *
@@ -20,37 +22,52 @@ public class VcardReader {
     }
 
     public Person read() {
-        String[] lines;
-        try {
-            lines = getLines();
-        } catch (IOException e) {
-            throw new VcardException(e);
-        }
         Person person = new Person();
-        for (String line : lines) {
-            if (line.startsWith("N:")) {
-                Name name = new Name();
-                String[] nameParts = line.substring(2).split(";");
-                name.setGivenName(nameParts[1]);
-                name.setFamilyName(nameParts[0]);
-                name.setAdditionalName(nameParts[2]);
-                name.setPrefixes(nameParts[3]);
-                person.setName(name);
-            }
-            if (line.startsWith("ORG:")) {
-                person.setOrganisation(line.substring(4));
-            }
-            if (line.startsWith("PHOTO;")) {
-                Photo photo = new Photo();
-                photo.setUrl(line.substring(line.indexOf(":") + 1));
-                photo.setMediaType(line.substring(line.indexOf("=") + 1, line.indexOf(":")));
-                person.setPhoto(photo);
-            }
+        try {
+            getLines().forEach(line -> {
+                if (line.startsWith("N:")) {
+                    person.setName(extractName(line));
+                }
+                if (line.startsWith("ORG:")) {
+                    person.setOrganisation(extractOrganisationName(line));
+                }
+                if (line.startsWith("PHOTO;")) {
+                    person.setPhoto(extractPhoto(line));
+                }
+            });
+            return person;
+        } catch (IOException ex) {
+            throw new VcardException("Could not extract data from source", ex);
         }
-        return person;
     }
 
-    private String[] getLines() throws IOException {
+    private Photo extractPhoto(String line) {
+        Photo photo = new Photo();
+        photo.setUrl(line.substring(line.indexOf(":") + 1));
+        photo.setMediaType(line.substring(line.indexOf("=") + 1, line.indexOf(":")));
+        return photo;
+    }
+
+    private static String extractOrganisationName(String line) {
+        return line.substring(4);
+    }
+
+    private Name extractName(String line) {
+        Name name = new Name();
+        String[] nameParts = line.substring(line.indexOf(":") + 1).split(";");
+        name.setGivenName(nameParts[1]);
+        name.setFamilyName(nameParts[0]);
+        name.setAdditionalName(nameParts[2]);
+        if (nameParts.length > 3) {
+            name.setPrefixes(nameParts[3]);
+        }
+        if (nameParts.length > 4) {
+            name.setSuffixes(nameParts[4]);
+        }
+        return name;
+    }
+
+    private List<String> getLines() throws IOException {
         StringBuilder stringBuilder = new StringBuilder();
         try (Reader reader = new BufferedReader(new InputStreamReader(source, StandardCharsets.UTF_8))) {
             int c = 0;
@@ -59,6 +76,6 @@ public class VcardReader {
             }
         }
         String[] lines = stringBuilder.toString().split("\n");
-        return lines;
+        return Arrays.asList(lines);
     }
 }
