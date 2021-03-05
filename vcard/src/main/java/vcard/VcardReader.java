@@ -6,6 +6,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 
@@ -21,10 +26,18 @@ public class VcardReader {
         this.source = source;
     }
 
-    public Person read() {
+    public Vcard read() {
+        Vcard result = new Vcard();
         Person person = new Person();
+        result.setPerson(person);
         try {
             getLines().forEach(line -> {
+                if (line.startsWith("VERSION:")) {
+                    result.setVersion(extractVersion(line));
+                }
+                if (line.startsWith("REV:")) {
+                    result.setRevision(extractRevision(line));
+                }
                 if (line.startsWith("N:")) {
                     person.setName(extractName(line));
                 }
@@ -35,10 +48,27 @@ public class VcardReader {
                     person.setPhoto(extractPhoto(line));
                 }
             });
-            return person;
+            return result;
         } catch (IOException ex) {
             throw new VcardException("Could not extract data from source", ex);
         }
+    }
+
+    private ZonedDateTime extractRevision(String line) {
+        String format = "yyyyMMdd'T'HHmmss";
+        String timestamp = line.substring(line.indexOf(":") + 1);
+        if (line.endsWith("Z")) {
+            return ZonedDateTime.parse(timestamp, DateTimeFormatter.ofPattern(format + "z"));
+        } else if (line.contains("+") || line.contains("-")) {
+            return OffsetDateTime.parse(timestamp, DateTimeFormatter.ofPattern(format + "XXXXX")).atZoneSameInstant(ZoneId.systemDefault());
+        } else {
+            return LocalDateTime.parse(timestamp, DateTimeFormatter.ofPattern(format)).atZone(ZoneId.systemDefault());
+        }
+    }
+
+    private Version extractVersion(String line) {
+        return Version.find(line.substring(line.indexOf(":") + 1))
+                .orElseThrow(() -> new VcardException("Could not determine vesion of the vcard"));
     }
 
     private Photo extractPhoto(String line) {
