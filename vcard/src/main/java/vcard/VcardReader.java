@@ -13,42 +13,45 @@ import java.nio.charset.StandardCharsets;
  */
 public class VcardReader {
 
-    private final InputStream is;
+    private final InputStream source;
 
-    public VcardReader(InputStream is) {
-        this.is = is;
+    public VcardReader(InputStream source) {
+        this.source = source;
     }
 
-    public Person read() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        try (Reader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+    public Person read() {
+        String[] lines;
+        try {
+            lines = getLines();
+        } catch (IOException e) {
+            throw new VcardException(e);
+        }
+        Person person = new Person();
+        for (String line : lines) {
+            if (line.startsWith("N:")) {
+                String[] nameParts = line.substring(2).split(";");
+                person.setFirstName(nameParts[1]);
+                person.setLastName(nameParts[0]);
+            }
+            if (line.startsWith("ORG:")) {
+                person.setOrganisation(line.substring(4));
+            }
+            if (line.startsWith("PHOTO;")) {
+                person.setPhoto(line.substring(26));
+            }
+        }
+        return person;
+    }
+
+    private String[] getLines() throws IOException {
+        StringBuilder stringBuilder = new StringBuilder();
+        try (Reader reader = new BufferedReader(new InputStreamReader(source, StandardCharsets.UTF_8))) {
             int c = 0;
-            while ((c = r.read()) != -1) { sb.append((char) c); }
+            while ((c = reader.read()) != -1) {
+                stringBuilder.append((char) c);
+            }
         }
-        String[] vc = sb.toString().split("\n");
-        Person p = new Person();
-        for (String l : vc) {
-        if (l.startsWith("N:")) {
-            String[] ns = l.substring(2).split(";");
-            p.setFirstName(ns[1]);
-                p.setLastName(ns[0]);
-        }
-        if (l.startsWith("ORG:")) 
-            p.setOrganisation(l.substring(4));
-        if (l.startsWith("PHOTO;")) {
-            p.setPhoto(l.substring(26));
-        }
-        }
-        return p;
-    }
-
-    public static void main(String[] args) throws IOException {
-        InputStream s = VcardReader.class.getResourceAsStream("/sample/vcard.4.0.vcf");
-        VcardReader r = new VcardReader(s);
-        Person p = r.read();
-        System.out.println(p.getFirstName());
-        System.out.println(p.getLastName());
-        System.out.println(p.getOrganisation());
-        System.out.println(p.getPhoto());
+        String[] lines = stringBuilder.toString().split("\n");
+        return lines;
     }
 }
