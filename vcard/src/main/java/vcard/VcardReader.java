@@ -59,6 +59,7 @@ public class VcardReader {
                     reader.addPhone(line);
                 }
             });
+            // TODO: Improve handling of phone numbers
             person.setPhones(reader.phones);
             reader.phones = new ArrayList<>();
             return Vcard.builder().revision(revision).version(version).person(person).build();
@@ -71,6 +72,10 @@ public class VcardReader {
         if (phones == null) {
             phones = new ArrayList<>();
         }
+        phones.add(extractPhone(line));
+    }
+
+    private Phone extractPhone(String line) {
         List<String> labels = new java.util.ArrayList<>();
         String number = "";
         String[] parts = line.split(";");
@@ -82,12 +87,12 @@ public class VcardReader {
                 number = part.substring(part.lastIndexOf(":") + 1);
             }
         }
-        phones.add(Phone.of(number, labels));
+        return Phone.of(number, labels);
     }
 
     private ZonedDateTime extractRevision(String line) {
         String format = "yyyyMMdd'T'HHmmss";
-        String timestamp = getValueOfLine(line);
+        String timestamp = StringUtil.getLineValue(line);
         if (line.endsWith("Z")) {
             return ZonedDateTime.parse(timestamp, DateTimeFormatter.ofPattern(format + "z"));
         } else if (line.contains("+") || line.contains("-")) {
@@ -98,18 +103,18 @@ public class VcardReader {
     }
 
     private Version extractVersion(String line) {
-        return Version.find(getValueOfLine(line))
+        return Version.find(StringUtil.getLineValue(line))
                 .orElseThrow(() -> new VcardException("Could not determine vesion of the vcard"));
     }
 
     private Photo extractPhoto(String line) {
-        String url = getValueOfLine(line);
+        String url = StringUtil.getLineValue(line);
         String mediaType = line.substring(line.indexOf("=") + 1, line.indexOf(":"));
         return Photo.of(url, mediaType);
     }
 
     private String extractOrganisationName(String line) {
-        return getValueOfLine(line);
+        return StringUtil.getLineValue(line);
     }
 
     private Name extractName(String line) {
@@ -119,7 +124,7 @@ public class VcardReader {
                 additional = 2,
                 prefixes = 3,
                 suffixes = 4;
-        String[] nameParts = getValueOfLine(line).split(";");
+        String[] nameParts = StringUtil.getLineValue(line).split(";");
         name.setGivenName(nameParts[given]);
         name.setFamilyName(nameParts[family]);
         name.setAdditionalName(nameParts[additional]);
@@ -130,10 +135,6 @@ public class VcardReader {
             name.setSuffixes(nameParts[suffixes]);
         }
         return name;
-    }
-
-    private static String getValueOfLine(String line) {
-        return line.substring(line.indexOf(":") + 1);
     }
 
     private List<String> getLines() throws IOException {
