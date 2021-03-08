@@ -26,37 +26,38 @@ public class VcardReader {
     private final InputStream source;
     private List<Phone> phones;
 
-    public VcardReader(InputStream source) {
+    private VcardReader(InputStream source) {
         this.source = source;
     }
 
-    public Vcard read() {
+    public static Vcard from(InputStream source) {
+        VcardReader reader = new VcardReader(source);
         Vcard result = new Vcard();
         Person person = new Person();
         result.setPerson(person);
         try {
-            getLines().forEach(line -> {
+            reader.getLines().forEach(line -> {
                 if (line.startsWith("VERSION")) {
-                    result.setVersion(extractVersion(line));
+                    result.setVersion(reader.extractVersion(line));
                 }
                 if (line.startsWith("REV")) {
-                    result.setRevision(extractRevision(line));
+                    result.setRevision(reader.extractRevision(line));
                 }
                 if (line.startsWith("N")) {
-                    person.setName(extractName(line));
+                    person.setName(reader.extractName(line));
                 }
                 if (line.startsWith("ORG")) {
-                    person.setOrganisation(extractOrganisationName(line));
+                    person.setOrganisation(reader.extractOrganisationName(line));
                 }
                 if (line.startsWith("PHOTO")) {
-                    person.setPhoto(extractPhoto(line));
+                    person.setPhoto(reader.extractPhoto(line));
                 }
                 if (line.startsWith("TEL")) {
-                    addPhone(line);
+                    reader.addPhone(line);
                 }
             });
-            person.setPhones(phones);
-            phones = new ArrayList<>();
+            person.setPhones(reader.phones);
+            reader.phones = new ArrayList<>();
             return result;
         } catch (IOException ex) {
             throw new VcardException("Could not extract data from source", ex);
@@ -82,7 +83,7 @@ public class VcardReader {
 
     private ZonedDateTime extractRevision(String line) {
         String format = "yyyyMMdd'T'HHmmss";
-        String timestamp = line.substring(line.indexOf(":") + 1);
+        String timestamp = getValueOfLine(line);
         if (line.endsWith("Z")) {
             return ZonedDateTime.parse(timestamp, DateTimeFormatter.ofPattern(format + "z"));
         } else if (line.contains("+") || line.contains("-")) {
@@ -93,19 +94,19 @@ public class VcardReader {
     }
 
     private Version extractVersion(String line) {
-        return Version.find(line.substring(line.indexOf(":") + 1))
+        return Version.find(getValueOfLine(line))
                 .orElseThrow(() -> new VcardException("Could not determine vesion of the vcard"));
     }
 
     private Photo extractPhoto(String line) {
         Photo photo = new Photo();
-        photo.setUrl(line.substring(line.indexOf(":") + 1));
+        photo.setUrl(getValueOfLine(line));
         photo.setMediaType(line.substring(line.indexOf("=") + 1, line.indexOf(":")));
         return photo;
     }
 
     private String extractOrganisationName(String line) {
-        return line.substring(4);
+        return getValueOfLine(line);
     }
 
     private Name extractName(String line) {
@@ -115,7 +116,7 @@ public class VcardReader {
                 additional = 2,
                 prefixes = 3,
                 suffixes = 4;
-        String[] nameParts = line.substring(line.indexOf(":") + 1).split(";");
+        String[] nameParts = getValueOfLine(line).split(";");
         name.setGivenName(nameParts[given]);
         name.setFamilyName(nameParts[family]);
         name.setAdditionalName(nameParts[additional]);
@@ -126,6 +127,10 @@ public class VcardReader {
             name.setSuffixes(nameParts[suffixes]);
         }
         return name;
+    }
+
+    private static String getValueOfLine(String line) {
+        return line.substring(line.indexOf(":") + 1);
     }
 
     private List<String> getLines() throws IOException {

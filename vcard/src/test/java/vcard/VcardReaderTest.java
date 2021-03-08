@@ -11,7 +11,7 @@ import org.junit.Test;
  */
 public class VcardReaderTest {
 
-    private final Vcard vcard = new VcardReader(VcardReaderTest.class.getResourceAsStream("/sample/vcard.4.0.vcf")).read();
+    private final Vcard vcard = VcardReader.from(VcardReaderTest.class.getResourceAsStream("/sample/vcard.4.0.vcf"));
 
     @Test
     public void test_name() {
