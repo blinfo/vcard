@@ -8,32 +8,30 @@ import java.time.ZonedDateTime;
  */
 public class Vcard {
 
-    private Version version;
-    private Person person;
-    private ZonedDateTime revision;
+    private final Version version;
+    private final Person person;
+    private final ZonedDateTime revision;
+
+    private Vcard(Version version, Person person, ZonedDateTime revision) {
+        this.version = version;
+        this.person = person;
+        this.revision = revision;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
 
     public Version getVersion() {
         return version;
-    }
-
-    public void setVersion(Version version) {
-        this.version = version;
     }
 
     public Person getPerson() {
         return person;
     }
 
-    public void setPerson(Person person) {
-        this.person = person;
-    }
-
     public ZonedDateTime getRevision() {
         return revision;
-    }
-
-    public void setRevision(ZonedDateTime revision) {
-        this.revision = revision;
     }
 
     @Override
@@ -41,4 +39,32 @@ public class Vcard {
         return "Vcard{" + "version=" + version + ", person=" + person + ", revision=" + revision + '}';
     }
 
+    public static class Builder {
+
+        private Version version;
+        private Person person;
+        private ZonedDateTime revision;
+
+        private Builder() {
+        }
+
+        public Builder version(Version version) {
+            this.version = version;
+            return this;
+        }
+
+        public Builder person(Person person) {
+            this.person = person;
+            return this;
+        }
+
+        public Builder revision(ZonedDateTime revision) {
+            this.revision = revision;
+            return this;
+        }
+
+        public Vcard build() {
+            return new Vcard(version, person, revision);
+        }
+    }
 }

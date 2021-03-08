@@ -8,23 +8,24 @@ import java.util.List;
  */
 public class Phone {
 
-    private List<String> labels;
-    private String number;
+    private final List<String> labels;
+    private final String number;
+
+    private Phone(String number, List<String> labels) {
+        this.number = number;
+        this.labels = labels;
+    }
+
+    public static Phone of(String number, List<String> labels) {
+        return new Phone(number, labels);
+    }
 
     public List<String> getLabels() {
         return labels;
     }
 
-    public void setLabels(List<String> labels) {
-        this.labels = labels;
-    }
-
     public String getNumber() {
         return number;
-    }
-
-    public void setNumber(String number) {
-        this.number = number;
     }
 
     @Override
