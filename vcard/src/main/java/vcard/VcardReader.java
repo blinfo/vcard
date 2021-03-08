@@ -24,7 +24,6 @@ import java.util.stream.Stream;
 public class VcardReader {
 
     private final InputStream source;
-    private List<Phone> phones;
 
     private VcardReader(InputStream source) {
         this.source = source;
@@ -55,28 +54,19 @@ public class VcardReader {
                 if (line.startsWith("PHOTO")) {
                     person.setPhoto(reader.extractPhoto(line));
                 }
-                if (line.startsWith("TEL")) {
-                    reader.addPhone(line);
-                }
             });
-            // TODO: Improve handling of phone numbers
-            person.setPhones(reader.phones);
-            reader.phones = new ArrayList<>();
+            person.setPhones(lines.stream()
+                    .filter(line -> line.startsWith("TEL"))
+                    .map(reader::extractPhone)
+                    .collect(Collectors.toList()));
             return Vcard.builder().revision(revision).version(version).person(person).build();
         } catch (IOException ex) {
             throw new VcardException("Could not extract data from source", ex);
         }
     }
 
-    private void addPhone(String line) {
-        if (phones == null) {
-            phones = new ArrayList<>();
-        }
-        phones.add(extractPhone(line));
-    }
-
     private Phone extractPhone(String line) {
-        List<String> labels = new java.util.ArrayList<>();
+        List<String> labels = new ArrayList<>();
         String number = "";
         String[] parts = line.split(";");
         for (String part : parts) {
