@@ -1,0 +1,115 @@
+Purpose and prerequisite:
+Purpose: to read vcard files.
+Prerequisite: limit the scope to latest vcard version (4.0)
+
+
+Version 1.0
+
+Person:
+One single entity class with getters and setters.
+
+VcardReader:
+A reader to process the vcard.vcf file
+The reader has a main method where the code is tested.
+
+ + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - +
+
+Version 1.1
+
+VcardReader:
+Changed cryptic variable names to something more legible.
+Formatted the code.
+Extracted the reading of the input data to a separate method.
+Main method removed, added a test class instead:
+
+VcardReaderTest:
+Mainly moved the checks from the main method to separate tests.
+
+Added a run time exception for exceptions in the code:
+VcardException
+
+ + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - +
+
+Version 2.0
+Backwards compatibility is broken!
+
+Added two new Entities, Name and Photo, for grouping fields and functionality 
+that are naturally (more or less) connected.
+
+Added test methods.
+
+ + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - +
+
+Version 2.1
+
+VcardReader:
+
+Extract Method. The read method was to large in the previous version, extract
+method is used. 
+
+
+
+ + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - +
+
+Version 2.2
+
+Three more entities (one enumeration), Phone, Vcard and Version (the 
+enumeration). 
+
+Added methods in VcardReader for handling these new entities.
+Added tests to VcardReaderTest to check the new entities.
+
+Removed "magic numbers", i.e. lines 113 through 117, extractName.
+
+Added toString for all entities for easier debugging.
+
+ + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - +
+
+Version 2.3
+
+Encapsulation, public constructor for VcardReader replaced with static factory 
+method.
+
+Method for reading the value of a line (to remove duplicated code).
+
+ + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - +
+
+Version 2.4 
+
+Backward compatibility is broken again, so this should probably have been a new
+major version.
+
+Further encapsulation.
+Immutability: Static factory methods (Phone, Photo), Builder (Vcard).
+
+Exceptions thrown if revision or version is not found in the source.
+
+ + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - +
+
+Version 2.5
+
+New utility class, StringUtil to handle string-operations. Easier to test. 
+So far with only one method.
+
+New test: StringUtilTest.
+
+ + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - +
+
+Version 2.6
+
+Improved handling of phone numbers.
+
+ + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - +
+
+Version X.X ...
+
+Further work, i.e. Address as object. The specification for address
+(https://tools.ietf.org/html/rfc6350#page-32 f.):
+
+    post office box
+    extended address
+    street address
+    locality
+    region
+    postal code
+    country name
